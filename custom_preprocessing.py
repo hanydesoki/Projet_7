@@ -2,12 +2,13 @@ import pandas as pd
 import numpy as np
 from data_science.preprocessing import DfEncoderOneHot
 from data_science.utils import ContextTimer
+from data_science.prexplo import describe_columns
 import gc
 
 class CustomPreprocessing:
     bin_features = ['CODE_GENDER', 'FLAG_OWN_CAR', 'FLAG_OWN_REALTY']
 
-    def __init__(self):
+    def __init__(self, crit_missing_rate=None):
         self.app_encoder = DfEncoderOneHot(nan_as_category=False)
         self.bureau_encoder = DfEncoderOneHot(nan_as_category=True)
         self.bb_encoder = DfEncoderOneHot(nan_as_category=True)
@@ -15,6 +16,18 @@ class CustomPreprocessing:
         self.pos_encoder = DfEncoderOneHot(nan_as_category=True)
         self.ins_encoder = DfEncoderOneHot(nan_as_category=True)
         self.cc_encoder = DfEncoderOneHot(nan_as_category=True)
+
+        self.crit_missing_rate = crit_missing_rate
+
+        self.removed_columns = None
+
+        if self.crit_missing_rate is not None:
+            if (self.crit_missing_rate is not int) and (self.crit_missing_rate is not float):
+                raise TypeError(f'crit_missing_rate must be int or float or None, not a {self.crit_missing_rate.__class__.__name__}.')
+
+            if (self.crit_missing_rate < 0) or (self.crit_missing_rate > 1):
+                raise ValueError(f'crit_missing_rate must be between 0 and 1, got {self.crit_missing_rate}.')
+
 
     def fit(self, application_df, bureau, bb, prev, pos, ins, cc):
         self.app_encoder.fit(application_df)
@@ -24,6 +37,8 @@ class CustomPreprocessing:
         self.pos_encoder.fit(pos)
         self.ins_encoder.fit(ins)
         self.cc_encoder.fit(cc)
+
+        self.removed_columns = None
         
     def transform(self, application_df, bureau, bb, prev, pos, ins, cc):
         df = self.application_train_preprocessing(application_df)
@@ -60,6 +75,15 @@ class CustomPreprocessing:
             gc.collect()
 
         df.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+        if self.crit_missing_rate is not None:
+            if self.removed_columns is None:
+                missing_rate_df = describe_columns(df)
+                self.removed_columns = list((missing_rate_df[missing_rate_df['NaN frequency'] > self.crit_missing_rate]).index)
+
+            if self.removed_columns:
+                df.drop(self.removed_columns, axis=1, inplace=True)
+
 
         return df
 
@@ -241,4 +265,13 @@ class CustomPreprocessing:
         gc.collect()
         return cc_agg
 
-    
+
+def filter_data(application_df, bureau, bb, prev, pos, ins, cc):
+    skid_curr_filter = list(application_df['SK_ID_CURR'].unique())
+    bureau_filtered = bureau[bureau['SK_ID_CURR'].isin(skid_curr_filter)]
+    prev_filtered = prev[prev['SK_ID_CURR'].isin(skid_curr_filter)]
+    pos_filtered = pos[pos['SK_ID_CURR'].isin(skid_curr_filter)]
+    ins_filtered = ins[ins['SK_ID_CURR'].isin(skid_curr_filter)]
+    cc_filtered = cc[cc['SK_ID_CURR'].isin(skid_curr_filter)]
+
+    return bureau, bb, prev_filtered, pos_filtered, ins_filtered, cc_filtered

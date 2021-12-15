@@ -50,7 +50,7 @@ with ContextTimer('Loading all datas'):
 
 SAMPLE_DATA = True
 
-N_SAMPLE = 100000
+N_SAMPLE = 10000
 
 with ContextTimer('Splitting data'):
     application_df = all_datas['application_train']
@@ -67,10 +67,14 @@ with ContextTimer('Splitting data'):
     application_train, application_test = train_test_split(application_df,
                                                            test_size=0.2,
                                                            random_state=0)
-
+    print('\nTrain:\n')
     print(application_train['TARGET'].value_counts())
+    print('\nTest:\n')
+    print(application_test['TARGET'].value_counts())
 
 # %%
+
+# Filter data to match application
 
 bureau_train, bb_train, prev_train, pos_train, ins_train, cc_train = filter_data(application_train,
                                                                                  bureau, bb, prev, pos, ins, cc)

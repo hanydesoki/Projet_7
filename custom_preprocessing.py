@@ -22,7 +22,7 @@ class CustomPreprocessing:
         self.removed_columns = None
 
         if self.crit_missing_rate is not None:
-            if (self.crit_missing_rate is not int) and (self.crit_missing_rate is not float):
+            if (not isinstance(self.crit_missing_rate, int)) and (not isinstance(self.crit_missing_rate, float)):
                 raise TypeError(f'crit_missing_rate must be int or float or None, not a {self.crit_missing_rate.__class__.__name__}.')
 
             if (self.crit_missing_rate < 0) or (self.crit_missing_rate > 1):

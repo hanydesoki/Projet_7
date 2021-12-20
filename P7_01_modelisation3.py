@@ -167,7 +167,7 @@ with ContextTimer('Modelisation'):
 # %%
 
 with ContextTimer('Learning Curve'):
-    score = 'f1'
+    score = fbeta_metrics
     N, train_score, val_score = learning_curve(final_model, X_train,
                                                y_train,
                                                cv=3,

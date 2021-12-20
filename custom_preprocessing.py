@@ -274,4 +274,4 @@ def filter_data(application_df, bureau, bb, prev, pos, ins, cc):
     ins_filtered = ins[ins['SK_ID_CURR'].isin(skid_curr_filter)]
     cc_filtered = cc[cc['SK_ID_CURR'].isin(skid_curr_filter)]
 
-    return bureau, bb, prev_filtered, pos_filtered, ins_filtered, cc_filtered
+    return bureau_filtered, bb, prev_filtered, pos_filtered, ins_filtered, cc_filtered

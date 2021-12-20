@@ -48,9 +48,8 @@ lorem_ipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non 
 
 ratio_target = application_df['TARGET'].mean()
 
-
-st.write(f"""
-# Pourcentage de crédits refusés: {(1 - ratio_target)*100} %""")
+st.header("Dashboard")
+st.subheader(f"Pourcentage de crédits refusés: {ratio_target*100} %")
 
 st.subheader('Applications')
 

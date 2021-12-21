@@ -204,4 +204,22 @@ with ContextTimer('Save models'):
 
 # %%
 
+# Feature importance
+
+feat_imp = final_model.named_steps['xgb'].feature_importances_
+pca = final_model.named_steps['pca']
+
+components = pca.components_
+
+all_columns = list(X_train.columns)
+
+best_feat_imp = {comp: imp for comp, imp in enumerate(feat_imp) if imp >= 0.015}
+
+for comp in best_feat_imp:
+    for feat, contribution in zip(all_columns, components[comp]):
+        if contribution >= 0.1:
+            print(feat, contribution)
+
+
+
 

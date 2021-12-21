@@ -55,3 +55,4 @@ st.subheader('Applications')
 
 st.write(application_df)
 
+

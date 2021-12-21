@@ -28,6 +28,7 @@ from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE
@@ -76,11 +77,13 @@ with ContextTimer('Splitting data'):
 
 # Filter data to match application
 
-bureau_train, bb_train, prev_train, pos_train, ins_train, cc_train = filter_data(application_train,
-                                                                                 bureau, bb, prev, pos, ins, cc)
+bureau_train, bb_train, prev_train, pos_train, ins_train, cc_train =\
+    filter_data(application_train,
+            bureau, bb, prev, pos, ins, cc)
 
-bureau_test, bb_test, prev_test, pos_test, ins_test, cc_test = filter_data(application_test,
-                                                                                 bureau, bb, prev, pos, ins, cc)
+bureau_test, bb_test, prev_test, pos_test, ins_test, cc_test =\
+    filter_data(application_test,
+                bureau, bb, prev, pos, ins, cc)
 
 # %%
 
@@ -142,11 +145,15 @@ with ContextTimer('Modelisation'):
                                           ('scaler', StandardScaler()),
                                           ('pca', PCA(n_components=0.95)),
                                           ('smt', SMOTE(random_state=0)),
-                                          ('knc', KNeighborsClassifier())])
+                                          ('xgb', XGBClassifier(use_label_encoder=False))])
 
     with ContextTimer('Parameter_optimizaion'):
-        param_grid = {
-                      'knc__n_neighbors': range(1, 5)}
+
+        param_grid={"xgb__n_estimators":[50, 100],
+                    'xgb__reg_lambda':[2, 1],
+                    'xgb__gamma':[0, 0.3, 0.2, 0.1]
+                    ,'xgb__eta':[0.06, 0.05, 0.04]
+                    ,"xgb__max_depth":[3, 5]}
 
         grid = GridSearchCV(copy.deepcopy(base_model), param_grid=param_grid, cv=3,
                             scoring=fbeta_metrics, verbose=3)

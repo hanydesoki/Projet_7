@@ -5,6 +5,7 @@ from custom_preprocessing import filter_data
 
 import streamlit as st
 import pandas as pd
+import plotly.graph_objects as go
 
 # %%
 
@@ -73,6 +74,7 @@ bureau, bb, prev, pos, ins, cc = filter_data(data_filtered, bureau, bb, prev, po
 
 st.header("Dashboard")
 
+# %%
 st.subheader('Applications')
 
 ratio_target = data_filtered['TARGET'].mean()
@@ -80,22 +82,39 @@ ratio_target = data_filtered['TARGET'].mean()
 st.subheader(f"Pourcentage de crédits refusés: {round(ratio_target * 100, 2)} %")
 
 st.subheader('Applications')
-st.write(data_filtered)
+st.write(data_filtered.head())
+
+labels = data_filtered['NAME_CONTRACT_TYPE'].value_counts().index
+values = data_filtered['NAME_CONTRACT_TYPE'].value_counts().values
+
+#The plot
+fig = go.Figure(
+    go.Pie(
+    labels = labels,
+    values = values,
+    hoverinfo = "label+percent",
+    textinfo = "value"
+))
+
+st.write("##### Type de contrat:")
+st.plotly_chart(fig)
+
+# %%
 
 st.subheader('Bureau')
-st.write(bureau)
+st.write(bureau.head())
 
 st.subheader('Applications précédentes')
-st.write(prev)
+st.write(prev.head())
 
 st.subheader('Acompte')
-st.write(ins)
+st.write(ins.head())
 
 st.subheader('POS')
-st.write(pos)
+st.write(pos.head())
 
 st.subheader('Solde de carte de crédits')
-st.write(cc)
+st.write(cc.head())
 
 
 

@@ -52,14 +52,24 @@ def filter_df(df, col, classes):
 st.sidebar.header('Options')
 
 gender_option = st.sidebar.selectbox('Genre', ['Tout'] + list(application_df['CODE_GENDER'].unique()))
+target_option = st.sidebar.selectbox('Crédit', ['Tout', 'Accepté', 'Refusé'])
 
-
-# %%
 
 if gender_option == 'Tout':
     data_filtered = application_df.copy()
 else:
     data_filtered = filter_df(application_df, 'CODE_GENDER', [gender_option])
+
+if target_option == 'Accepté':
+    data_filtered = filter_df(application_df, 'TARGET', [0])
+elif target_option == 'Refusé':
+    data_filtered = filter_df(application_df, 'TARGET', [1])
+
+
+bureau, bb, prev, pos, ins, cc = filter_data(data_filtered, bureau, bb, prev, pos, ins, cc)
+
+
+# %%
 
 st.header("Dashboard")
 
@@ -69,4 +79,24 @@ ratio_target = data_filtered['TARGET'].mean()
 
 st.subheader(f"Pourcentage de crédits refusés: {round(ratio_target * 100, 2)} %")
 
+st.subheader('Applications')
 st.write(data_filtered)
+
+st.subheader('Bureau')
+st.write(bureau)
+
+st.subheader('Applications précédentes')
+st.write(prev)
+
+st.subheader('Acompte')
+st.write(ins)
+
+st.subheader('POS')
+st.write(pos)
+
+st.subheader('Solde de carte de crédits')
+st.write(cc)
+
+
+
+

@@ -82,12 +82,12 @@ ratio_target = data_filtered['TARGET'].mean()
 st.subheader(f"Pourcentage de crédits refusés: {round(ratio_target * 100, 2)} %")
 
 st.subheader('Applications')
-st.write(data_filtered.head())
+st.write(data_filtered.head(20))
 
 labels = data_filtered['NAME_CONTRACT_TYPE'].value_counts().index
 values = data_filtered['NAME_CONTRACT_TYPE'].value_counts().values
 
-#The plot
+#Contract type pie chart
 fig = go.Figure(
     go.Pie(
     labels = labels,
@@ -97,6 +97,19 @@ fig = go.Figure(
 ))
 
 st.write("##### Type de contrat:")
+st.plotly_chart(fig)
+
+# Amounts plot
+
+x = ['AMT_INCOME_TOTAL', 'AMT_CREDIT', 'AMT_ANNUITY', 'AMT_GOODS_PRICE']
+
+y = data_filtered[x].mean(axis=0).values
+
+fig = go.Figure(go.Bar(x=x, y=y, text=values))
+
+fig.update_layout(yaxis=dict(title='Moyenne ($)'))
+
+st.write("##### Moyennes:")
 st.plotly_chart(fig)
 
 # %%

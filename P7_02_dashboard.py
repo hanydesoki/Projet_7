@@ -120,6 +120,21 @@ st.write(bureau.head())
 st.subheader('Applications précédentes')
 st.write(prev.head())
 
+labels = prev['NAME_CONTRACT_STATUS'].value_counts().index
+values = prev['NAME_CONTRACT_STATUS'].value_counts().values
+
+#Contract type pie chart
+fig = go.Figure(
+    go.Pie(
+    labels = labels,
+    values = values,
+    hoverinfo = "label+percent",
+    textinfo = "value"
+))
+
+st.write("##### Status de contrat:")
+st.plotly_chart(fig)
+
 st.subheader('Acompte')
 st.write(ins.head())
 

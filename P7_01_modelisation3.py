@@ -49,6 +49,7 @@ with ContextTimer('Loading all datas'):
 
 # %%
 
+
 SAMPLE_DATA = True
 
 N_SAMPLE = 10000
@@ -145,11 +146,12 @@ with ContextTimer('Modelisation'):
                                           ('scaler', StandardScaler()),
                                           ('pca', PCA(n_components=0.95)),
                                           ('smt', SMOTE(random_state=0)),
-                                          ('xgb', XGBClassifier(use_label_encoder=False))])
+                                          ('xgb', XGBClassifier(use_label_encoder=False,
+                                                                n_estimators=50))])
 
     with ContextTimer('Parameter_optimizaion'):
 
-        param_grid={"xgb__n_estimators":[50, 100],
+        param_grid={
                     'xgb__reg_lambda':[2, 1],
                     'xgb__gamma':[0, 0.3, 0.2, 0.1]
                     ,'xgb__eta':[0.06, 0.05, 0.04]
@@ -164,12 +166,19 @@ with ContextTimer('Modelisation'):
 
         print('\n Best parameters:', best_params)
 
-    with ContextTimer('Fit with best model'):
-        final_model = copy.deepcopy(base_model).set_params(**best_params)
+# %%
 
-        final_model.fit(X_train, y_train)
+with ContextTimer('Fit with best model'):
+    final_model = pipeline.Pipeline(steps=[('imputer', FillImputer()),
+                                          ('scaler', StandardScaler()),
+                                          ('smt', SMOTE(random_state=0)),
+                                          ('xgb', XGBClassifier(use_label_encoder=False,
+                                            n_estimators=50))]).set_params(**best_params)
 
-        evaluate_class(final_model, X_test, y_test)
+
+    final_model.fit(X_train, y_train)
+
+    evaluate_class(final_model, X_test, y_test)
 
 # %%
 
@@ -204,22 +213,6 @@ with ContextTimer('Save models'):
 
 # %%
 
-# Feature importance
-
-feat_imp = final_model.named_steps['xgb'].feature_importances_
-pca = final_model.named_steps['pca']
-
-components = pca.components_
-
-all_columns = list(X_train.columns)
-
-best_feat_imp = {comp: imp for comp, imp in enumerate(feat_imp) if imp >= 0.015}
-
-for comp in best_feat_imp:
-    for feat, contribution in zip(all_columns, components[comp]):
-        if contribution >= 0.1:
-            print(feat, contribution)
-
-
+feat_imp = final_model.named_steps['xgb'].feature_importances
 
 

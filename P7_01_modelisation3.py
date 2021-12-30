@@ -172,7 +172,7 @@ with ContextTimer('Fit with best model'):
     final_model = pipeline.Pipeline(steps=[('imputer', FillImputer()),
                                           ('scaler', StandardScaler()),
                                           ('smt', SMOTE(random_state=0)),
-                                          ('xgb', XGBClassifier(use_label_encoder=False,
+                                          ('xgb', XGBClassifier(
                                             n_estimators=50))]).set_params(**best_params)
 
 
@@ -213,6 +213,6 @@ with ContextTimer('Save models'):
 
 # %%
 
-feat_imp = final_model.named_steps['xgb'].feature_importances
+feat_imp = pd.DataFrame(final_model.named_steps['xgb'].feature_importances_, index=X_train.columns)
 
 

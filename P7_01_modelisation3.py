@@ -153,8 +153,8 @@ with ContextTimer('Modelisation'):
 
         param_grid={
                     'xgb__reg_lambda':[2, 1],
-                    'xgb__gamma':[0, 0.3, 0.2, 0.1]
-                    ,'xgb__eta':[0.06, 0.05, 0.04]
+                    'xgb__gamma':[0, 0.2, 0.1]
+                    ,'xgb__eta':[0.05, 0.04]
                     ,"xgb__max_depth":[3, 5]}
 
         grid = GridSearchCV(copy.deepcopy(base_model), param_grid=param_grid, cv=3,
@@ -214,5 +214,4 @@ with ContextTimer('Save models'):
 # %%
 
 feat_imp = pd.DataFrame(final_model.named_steps['xgb'].feature_importances_, index=X_train.columns)
-
 

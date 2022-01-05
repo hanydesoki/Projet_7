@@ -9,7 +9,7 @@ import gc
 import copy
 import pickle
 from data_science import prexplo, explo
-from data_science.utils import timer, ContextTimer
+from data_science.utils import ContextTimer
 from data_science.data_management import DataGroup
 from data_science.evaluations import evaluate_class
 from data_science.preprocessing import FillImputer
@@ -182,24 +182,24 @@ with ContextTimer('Fit with best model'):
 
 # %%
 
-with ContextTimer('Learning Curve'):
-    score = fbeta_metrics
-    N, train_score, val_score = learning_curve(final_model, X_train,
-                                               y_train,
-                                               cv=3,
-                                               scoring=score,
-                                               verbose=5)
+#with ContextTimer('Learning Curve'):
+#    score = fbeta_metrics
+#    N, train_score, val_score = learning_curve(final_model, X_train,
+#                                               y_train,
+#                                               cv=3,
+#                                               scoring=score,
+#                                               verbose=5)
 
-    plt.figure()
-    plt.plot(N, train_score.mean(axis=1), label='Train score')
-    plt.plot(N, val_score.mean(axis=1), label='Validation score')
+#    plt.figure()
+#    plt.plot(N, train_score.mean(axis=1), label='Train score')
+#    plt.plot(N, val_score.mean(axis=1), label='Validation score')
 
-    plt.legend()
-    plt.xlabel('Train size')
-    plt.ylabel(score)
-    plt.title('Learning Curve')
-    plt.show()
-    plt.savefig('Learning curve')
+#    plt.legend()
+#    plt.xlabel('Train size')
+#    plt.ylabel(score)
+#    plt.title('Learning Curve')
+#    plt.show()
+#    plt.savefig('Learning curve')
 
 
 

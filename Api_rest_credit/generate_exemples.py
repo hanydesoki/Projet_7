@@ -35,7 +35,8 @@ def save_data(app, bureau, bb, prev, pos, ins, cc, folder):
     bureau.to_csv(os.path.join(folder, 'bureau.csv'))
     bb.to_csv(os.path.join(folder, 'bureau_balance.csv'))
     prev.to_csv(os.path.join(folder, 'previous_application.csv'))
-    pos.to_csv(os.path.join(folder, 'instalment_payments.csv'))
+    pos.to_csv(os.path.join(folder, 'POS_CASH_balance.csv'))
+    ins.to_csv(os.path.join(folder, 'instalment_payments.csv'))
     cc.to_csv(os.path.join(folder, 'credit_card_balance.csv'))
 
 # %%

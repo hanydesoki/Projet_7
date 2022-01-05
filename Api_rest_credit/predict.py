@@ -17,8 +17,11 @@ with open('credit_model.pkl', 'rb') as f:
 def predict_score(application_df, bureau, bb, prev, pos, ins, cc):
     df = merger.transform(application_df, bureau, bb, prev, pos, ins, cc)
 
-    X = df.drop('TARGET', axis=1)
+    try:
+        df.drop('TARGET', axis=1, inplace=True)
+    except KeyError:
+        pass
 
-    pred = model.predict_proba(X)
+    pred = model.predict_proba(df)[0][0]
 
-    return pred
+    return {'score': pred}

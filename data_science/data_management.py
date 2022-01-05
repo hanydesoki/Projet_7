@@ -26,6 +26,10 @@ class DataGroup:
             path = os.path.join(self.data_folder, data_file)
             print(f'Loading file: {data_file}')
             self.datas[filename] = self.reader[extension](path)
+            column_to_remove = [col for col in self.datas[filename].columns if 'Unnamed' in col]
+
+            if column_to_remove:
+                self.datas[filename].drop(column_to_remove, axis=1, inplace=True)
 
         self.check_main_table = False
 

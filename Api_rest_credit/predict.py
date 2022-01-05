@@ -14,5 +14,11 @@ with open('merger.pkl', 'rb') as f:
 with open('credit_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-def predict():
-    pass
+def predict_score(application_df, bureau, bb, prev, pos, ins, cc):
+    df = merger.transform(application_df, bureau, bb, prev, pos, ins, cc)
+
+    X = df.drop('TARGET', axis=1)
+
+    pred = model.predict_proba(X)
+
+    return pred

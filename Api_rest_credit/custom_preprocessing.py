@@ -269,9 +269,11 @@ class CustomPreprocessing:
 def filter_data(application_df, bureau, bb, prev, pos, ins, cc):
     skid_curr_filter = list(application_df['SK_ID_CURR'].unique())
     bureau_filtered = bureau[bureau['SK_ID_CURR'].isin(skid_curr_filter)]
+    skid_bureau_filter = list(bureau_filtered['SK_ID_BUREAU'].unique())
+    bb_filtered = bb[bb['SK_ID_BUREAU'].isin(skid_bureau_filter)]
     prev_filtered = prev[prev['SK_ID_CURR'].isin(skid_curr_filter)]
     pos_filtered = pos[pos['SK_ID_CURR'].isin(skid_curr_filter)]
     ins_filtered = ins[ins['SK_ID_CURR'].isin(skid_curr_filter)]
     cc_filtered = cc[cc['SK_ID_CURR'].isin(skid_curr_filter)]
 
-    return bureau_filtered, bb, prev_filtered, pos_filtered, ins_filtered, cc_filtered
+    return bureau_filtered, bb_filtered, prev_filtered, pos_filtered, ins_filtered, cc_filtered

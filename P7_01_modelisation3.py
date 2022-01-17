@@ -29,6 +29,7 @@ from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
+import xgboost
 
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE
@@ -40,6 +41,9 @@ pd.set_option("display.max_columns", None)
 
 ContextTimer.clear_timers()
 
+# %%
+
+print(xgboost.__version__)
 # %%
 
 with ContextTimer('Loading all datas'):
@@ -180,28 +184,6 @@ with ContextTimer('Fit with best model'):
 
     evaluate_class(final_model, X_test, y_test)
 
-# %%
-
-#with ContextTimer('Learning Curve'):
-#    score = fbeta_metrics
-#    N, train_score, val_score = learning_curve(final_model, X_train,
-#                                               y_train,
-#                                               cv=3,
-#                                               scoring=score,
-#                                               verbose=5)
-
-#    plt.figure()
-#    plt.plot(N, train_score.mean(axis=1), label='Train score')
-#    plt.plot(N, val_score.mean(axis=1), label='Validation score')
-
-#    plt.legend()
-#    plt.xlabel('Train size')
-#    plt.ylabel(score)
-#    plt.title('Learning Curve')
-#    plt.show()
-#    plt.savefig('Learning curve')
-
-
 
 # %%
 
@@ -215,3 +197,42 @@ with ContextTimer('Save models'):
 
 feat_imp = pd.DataFrame(final_model.named_steps['xgb'].feature_importances_, index=X_train.columns)
 
+# %%
+
+# Getting score of all application_df for the dashboard
+
+bureau, bb, prev, pos, ins, cc =\
+    filter_data(application_df,
+            bureau, bb, prev, pos, ins, cc)
+
+X = merger.transform(application_df,
+                     bureau,
+                     bb,
+                     prev,
+                     pos,
+                     ins,
+                     cc)
+
+X.drop('TARGET', axis=1, inplace=True)
+# %%
+
+scores = final_model.predict_proba(X)[:,0]
+
+application_df['SCORE'] = scores
+
+# %%
+
+directory = 'Dashboard_data'
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+# save data
+
+application_df.to_csv(os.path.join(directory, 'application.csv'))
+bureau.to_csv(os.path.join(directory, 'bureau.csv'))
+bb.to_csv(os.path.join(directory, 'bureau_balance.csv'))
+prev.to_csv(os.path.join(directory, 'previous_application.csv'))
+pos.to_csv(os.path.join(directory, 'POS_CASH_balance.csv'))
+ins.to_csv(os.path.join(directory, 'installments_payments.csv'))
+cc.to_csv(os.path.join(directory, 'credit_card_balance.csv'))

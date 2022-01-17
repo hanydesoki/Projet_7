@@ -1,4 +1,5 @@
 from time import time
+import os
 
 class ContextTimer:
     '''Used as a context manager for timing execution of code'''

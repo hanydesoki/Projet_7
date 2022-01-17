@@ -15,35 +15,38 @@ st.set_page_config(layout="wide")
 
 # Loading data
 
+
 @st.cache(allow_output_mutation=True)
 def load_data(folder):
 
-
     application_df = pd.read_csv(os.path.join(folder, 'application.csv'))
-    bureau = pd.read_csv(os.path.join(folder, 'bureau.csv'))
-    bb = pd.read_csv(os.path.join(folder, 'bureau_balance.csv'))
+    #bureau = pd.read_csv(os.path.join(folder, 'bureau.csv'))
+    #bb = pd.read_csv(os.path.join(folder, 'bureau_balance.csv'))
     prev = pd.read_csv(os.path.join(folder, 'previous_application.csv'))
-    pos = pd.read_csv(os.path.join(folder, 'POS_CASH_balance.csv'))
-    ins = pd.read_csv(os.path.join(folder, 'installments_payments.csv'))
-    cc = pd.read_csv(os.path.join(folder, 'credit_card_balance.csv'))
+    #pos = pd.read_csv(os.path.join(folder, 'POS_CASH_balance.csv'))
+    #ins = pd.read_csv(os.path.join(folder, 'installments_payments.csv'))
+    #cc = pd.read_csv(os.path.join(folder, 'credit_card_balance.csv'))
 
-    return application_df, bureau, bb, prev, pos, ins, cc
+    # return application_df, bureau, bb, prev, pos, ins, cc
+    return application_df, prev
 
 # %%
 
-def filter_data(application_df, bureau, bb, prev, pos, ins, cc):
+
+def filter_data(application_df, prev):
     skid_curr_filter = list(application_df['SK_ID_CURR'].unique())
-    bureau_filtered = bureau[bureau['SK_ID_CURR'].isin(skid_curr_filter)]
-    skid_bureau_filter = list(bureau_filtered['SK_ID_BUREAU'].unique())
-    bb_filtered = bb[bb['SK_ID_BUREAU'].isin(skid_bureau_filter)]
+    #bureau_filtered = bureau[bureau['SK_ID_CURR'].isin(skid_curr_filter)]
+    #skid_bureau_filter = list(bureau_filtered['SK_ID_BUREAU'].unique())
+    #bb_filtered = bb[bb['SK_ID_BUREAU'].isin(skid_bureau_filter)]
     prev_filtered = prev[prev['SK_ID_CURR'].isin(skid_curr_filter)]
-    pos_filtered = pos[pos['SK_ID_CURR'].isin(skid_curr_filter)]
-    ins_filtered = ins[ins['SK_ID_CURR'].isin(skid_curr_filter)]
-    cc_filtered = cc[cc['SK_ID_CURR'].isin(skid_curr_filter)]
+    #pos_filtered = pos[pos['SK_ID_CURR'].isin(skid_curr_filter)]
+    #ins_filtered = ins[ins['SK_ID_CURR'].isin(skid_curr_filter)]
+    #cc_filtered = cc[cc['SK_ID_CURR'].isin(skid_curr_filter)]
 
-    return bureau_filtered, bb_filtered, prev_filtered, pos_filtered, ins_filtered, cc_filtered
-
+    # return bureau_filtered, bb_filtered, prev_filtered, pos_filtered, ins_filtered, cc_filtered
+    return prev_filtered
 # %%
+
 
 def comp_confmat(actual, predicted):
 
@@ -57,8 +60,9 @@ def comp_confmat(actual, predicted):
     for i in range(len(classes)):
         for j in range(len(classes)):
 
-           # count the number of instances in each combination of actual / predicted classes
-           confmat[i, j] = np.sum((actual == classes[i]) & (predicted == classes[j]))
+            # count the number of instances in each combination of actual / predicted classes
+            confmat[i, j] = np.sum((actual == classes[i])
+                                   & (predicted == classes[j]))
 
     return confmat
 
@@ -66,15 +70,20 @@ def comp_confmat(actual, predicted):
 # %%
 
 
-application_df, bureau, bb, prev, pos, ins, cc = load_data('Dashboard_data')
+application_df, prev = load_data('Dashboard_data')
 
 application_df['DAYS_EMPLOYED'].replace(365243, np.nan, inplace=True)
 # Some simple new features (percentages)
-application_df['DAYS_EMPLOYED_PERC'] = application_df['DAYS_EMPLOYED'] / application_df['DAYS_BIRTH']
-application_df['INCOME_CREDIT_PERC'] = application_df['AMT_INCOME_TOTAL'] / application_df['AMT_CREDIT']
-application_df['INCOME_PER_PERSON'] = application_df['AMT_INCOME_TOTAL'] / application_df['CNT_FAM_MEMBERS']
-application_df['ANNUITY_INCOME_PERC'] = application_df['AMT_ANNUITY'] / application_df['AMT_INCOME_TOTAL']
-application_df['PAYMENT_RATE'] = application_df['AMT_ANNUITY'] / application_df['AMT_CREDIT']
+application_df['DAYS_EMPLOYED_PERC'] = application_df['DAYS_EMPLOYED'] / \
+    application_df['DAYS_BIRTH']
+application_df['INCOME_CREDIT_PERC'] = application_df['AMT_INCOME_TOTAL'] / \
+    application_df['AMT_CREDIT']
+application_df['INCOME_PER_PERSON'] = application_df['AMT_INCOME_TOTAL'] / \
+    application_df['CNT_FAM_MEMBERS']
+application_df['ANNUITY_INCOME_PERC'] = application_df['AMT_ANNUITY'] / \
+    application_df['AMT_INCOME_TOTAL']
+application_df['PAYMENT_RATE'] = application_df['AMT_ANNUITY'] / \
+    application_df['AMT_CREDIT']
 
 new_features = ['DAYS_EMPLOYED_PERC', 'INCOME_CREDIT_PERC',
                 'ANNUITY_INCOME_PERC', 'PAYMENT_RATE']
@@ -87,15 +96,17 @@ def filter_df(df, col, classes):
 
 # %%
 
-col0 = st.columns(2) # Titre
-col1 = st.columns(2) # Deux premiers graphs
-col2 = st.columns(2) # Résumé client
-col3 = st.columns(2) # Deux derniers graphs
-col4 = st.columns(2) # Résumé client application précédentes
+
+col0 = st.columns(2)  # Titre
+col1 = st.columns(2)  # Deux premiers graphs
+col2 = st.columns(2)  # Résumé client
+col3 = st.columns(2)  # Deux derniers graphs
+col4 = st.columns(2)  # Résumé client application précédentes
 
 st.sidebar.header('Options')
 
-gender_option = st.sidebar.selectbox('Genre', ['Tout'] + list(application_df['CODE_GENDER'].unique()))
+gender_option = st.sidebar.selectbox(
+    'Genre', ['Tout'] + list(application_df['CODE_GENDER'].unique()))
 target_option = st.sidebar.selectbox('Crédit', ['Tout', 'Accepté', 'Refusé'])
 car_option = st.sidebar.selectbox('Véhiculé', ['Tout', 'Oui', 'Non'])
 realty_option = st.sidebar.selectbox('Propriétaire', ['Tout', 'Oui', 'Non'])
@@ -141,7 +152,6 @@ elif realty_option == 'Non':
     data_filtered = filter_df(data_filtered, 'FLAG_OWN_REALTY', ['N'])
 
 
-
 # Confusion matrix
 conf_mat = comp_confmat(data_filtered['TARGET'], data_filtered['PRED'])
 
@@ -152,8 +162,7 @@ fp = conf_mat[1, 0]
 
 if client_filter:
     application_client = filter_df(application_df, 'SK_ID_CURR', [client_id])
-    bureau_client, bb_client, prev_client, pos_client, ins_client, cc_client =\
-        filter_data(application_client, bureau, bb, prev, pos, ins, cc)
+    prev_client = filter_data(application_client, prev)
 
     target_client = application_client['TARGET'].values[0]
     score_client = application_client['SCORE'].values[0]
@@ -162,9 +171,7 @@ if client_filter:
     car_client = car[application_client['FLAG_OWN_CAR'].values[0]]
     realty_client = car[application_client['FLAG_OWN_REALTY'].values[0]]
 
-bureau, bb, prev, pos, ins, cc = filter_data(data_filtered, bureau, bb, prev, pos, ins, cc)
-
-
+prev = filter_data(data_filtered, prev)
 
 
 # %%
@@ -173,16 +180,18 @@ col0[0].header("Dashboard de Home Credit")
 
 
 # %%
-#st.subheader('Applications')
+# st.subheader('Applications')
 
 ratio_target = data_filtered['TARGET'].mean()
 
-col0[0].write(f"Echantillon de {application_df.shape[0]} applications. ({data_filtered.shape[0]} après le filtre)")
-col0[0].subheader(f"Pourcentage de crédits refusés: {round(ratio_target * 100, 2)} %")
+col0[0].write(
+    f"Echantillon de {application_df.shape[0]} applications. ({data_filtered.shape[0]} après le filtre)")
+col0[0].subheader(
+    f"Pourcentage de crédits refusés: {round(ratio_target * 100, 2)} %")
 
 
-#st.subheader('Applications')
-#st.write(data_filtered.head(20))
+# st.subheader('Applications')
+# st.write(data_filtered.head(20))
 
 labels = ['Vrai négatifs', 'Vrai positif', 'Faux négatif', 'Faux positif']
 values = [tn, tp, fn, fp]
@@ -191,11 +200,11 @@ colors = ['gold', 'mediumturquoise', 'darkorange', 'lightgreen']
 # Confusion matrix plot
 fig1 = go.Figure(
     go.Pie(
-    labels = labels,
-    values = values,
-    hoverinfo = "label+percent",
-    textinfo = "value",
-    marker=dict(colors=colors))
+        labels=labels,
+        values=values,
+        hoverinfo="label+percent",
+        textinfo="value",
+        marker=dict(colors=colors))
 )
 
 fig1.update_layout(
@@ -218,7 +227,6 @@ if client_filter:
              -Propriétaire: {realty_client}""")
 
 
-
 # Amounts plot
 
 x = ['AMT_INCOME_TOTAL', 'AMT_CREDIT', 'AMT_ANNUITY', 'AMT_GOODS_PRICE']
@@ -226,26 +234,26 @@ x = ['AMT_INCOME_TOTAL', 'AMT_CREDIT', 'AMT_ANNUITY', 'AMT_GOODS_PRICE']
 y_0 = data_filtered[data_filtered['TARGET'] == 0][x].mean(axis=0).values
 y_1 = data_filtered[data_filtered['TARGET'] == 1][x].mean(axis=0).values
 
-amount_values_0 = go.Bar(x=x, y=y_0,showlegend=True, name='Accepté')
-amount_values_1 = go.Bar(x=x, y=y_1,showlegend=True, name='Refusé')
+amount_values_0 = go.Bar(x=x, y=y_0, showlegend=True, name='Accepté')
+amount_values_1 = go.Bar(x=x, y=y_1, showlegend=True, name='Refusé')
 #trace1 = go.Bar(x=x, y=[0],showlegend=False,hoverinfo='none')
 #trace2 = go.Bar(x=x, y=[0], yaxis='y2',showlegend=False,hoverinfo='none')
 
-data = [amount_values_0,amount_values_1]
+data = [amount_values_0, amount_values_1]
 
 
 if client_filter:
     y_client = application_client[x].mean(axis=0).values
-    amout_values_client =  go.Bar(x=x, y=y_client, showlegend=True,
-                                  name=f'Client ({client_id})')
+    amout_values_client = go.Bar(x=x, y=y_client, showlegend=True,
+                                 name=f'Client ({client_id})')
 
     data.append(amout_values_client)
 
 layout = go.Layout(barmode='group',
-                   legend=dict(x=0.7, y=1.2,orientation="h"),
+                   legend=dict(x=0.7, y=1.2, orientation="h"),
                    yaxis=dict(title='Moyennes ($)'),
-                   yaxis2=dict(title = '',
-                               overlaying = 'y',
+                   yaxis2=dict(title='',
+                               overlaying='y',
                                side='right'))
 
 #fig2.update_layout(yaxis=dict(title='Moyenne ($)'))
@@ -262,28 +270,30 @@ col1[1].plotly_chart(fig2)
 
 # Rate plot plot
 
-y_0 = data_filtered[data_filtered['TARGET'] == 0][new_features].mean(axis=0).values
-y_1 = data_filtered[data_filtered['TARGET'] == 1][new_features].mean(axis=0).values
+y_0 = data_filtered[data_filtered['TARGET']
+                    == 0][new_features].mean(axis=0).values
+y_1 = data_filtered[data_filtered['TARGET']
+                    == 1][new_features].mean(axis=0).values
 
-perc_values_0 = go.Bar(x=new_features, y=y_0,showlegend=True, name='Accepté')
-perc_values_1 = go.Bar(x=new_features, y=y_1,showlegend=True, name='Refusé')
+perc_values_0 = go.Bar(x=new_features, y=y_0, showlegend=True, name='Accepté')
+perc_values_1 = go.Bar(x=new_features, y=y_1, showlegend=True, name='Refusé')
 #trace1 = go.Bar(x=x, y=[0],showlegend=False,hoverinfo='none')
 #trace2 = go.Bar(x=x, y=[0], yaxis='y2',showlegend=False,hoverinfo='none')
 
-data = [perc_values_0,perc_values_1]
+data = [perc_values_0, perc_values_1]
 
 if client_filter:
     y_client = application_client[new_features].mean(axis=0).values
-    amout_values_client =  go.Bar(x=new_features, y=y_client, showlegend=True,
-                                  name=f'Client ({client_id})')
+    amout_values_client = go.Bar(x=new_features, y=y_client, showlegend=True,
+                                 name=f'Client ({client_id})')
 
     data.append(amout_values_client)
 
 layout = go.Layout(barmode='group',
-                   legend=dict(x=0.7, y=1.2,orientation="h"),
+                   legend=dict(x=0.7, y=1.2, orientation="h"),
                    yaxis=dict(title='Ratio'),
-                   yaxis2=dict(title = '',
-                               overlaying = 'y',
+                   yaxis2=dict(title='',
+                               overlaying='y',
                                side='right'))
 
 #fig2.update_layout(yaxis=dict(title='Moyenne ($)'))
@@ -300,10 +310,10 @@ col3[0].plotly_chart(fig3)
 
 # %%
 
-#st.subheader('Bureau')
-#st.write(bureau.head())
+# st.subheader('Bureau')
+# st.write(bureau.head())
 
-#st.write(prev.head())
+# st.write(prev.head())
 
 labels = prev['NAME_CONTRACT_STATUS'].value_counts().index
 values = prev['NAME_CONTRACT_STATUS'].value_counts().values
@@ -311,8 +321,10 @@ values = prev['NAME_CONTRACT_STATUS'].value_counts().values
 if client_id:
     col4[1].write(f'Application(s) précédentes du client {client_id}:')
     if prev_client.shape[0] > 0:
-        labels_client = prev_client['NAME_CONTRACT_STATUS'].value_counts().index
-        values_client = prev_client['NAME_CONTRACT_STATUS'].value_counts().values
+        labels_client = prev_client['NAME_CONTRACT_STATUS'].value_counts(
+        ).index
+        values_client = prev_client['NAME_CONTRACT_STATUS'].value_counts(
+        ).values
         for lab, val in zip(labels_client, values_client):
             col4[1].write(f'-{lab}: {val}')
     else:
@@ -321,11 +333,11 @@ if client_id:
 # Contract type pie chart
 fig4 = go.Figure(
     go.Pie(
-    labels = labels,
-    values = values,
-    hoverinfo = "label+percent",
-    textinfo = "value"
-))
+        labels=labels,
+        values=values,
+        hoverinfo="label+percent",
+        textinfo="value"
+    ))
 
 fig4.update_layout(
     autosize=False,
@@ -335,15 +347,11 @@ fig4.update_layout(
 col3[1].write("##### Status des contrats précédents:")
 col3[1].plotly_chart(fig4)
 
-#st.subheader('Acompte')
-#st.write(ins.head())
+# st.subheader('Acompte')
+# st.write(ins.head())
 
-#st.subheader('POS')
-#st.write(pos.head())
+# st.subheader('POS')
+# st.write(pos.head())
 
 #st.subheader('Solde de carte de crédits')
-#st.write(cc.head())
-
-
-
-
+# st.write(cc.head())

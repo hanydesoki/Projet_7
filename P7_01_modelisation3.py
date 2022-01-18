@@ -21,7 +21,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split, GridSearchCV, learning_curve
-from sklearn.metrics import fbeta_score, make_scorer
+from sklearn.metrics import fbeta_score, make_scorer, f1_score, recall_score, accuracy_score, precision_score
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
 from sklearn.impute import KNNImputer
@@ -236,3 +236,39 @@ prev.to_csv(os.path.join(directory, 'previous_application.csv'))
 pos.to_csv(os.path.join(directory, 'POS_CASH_balance.csv'))
 ins.to_csv(os.path.join(directory, 'installments_payments.csv'))
 cc.to_csv(os.path.join(directory, 'credit_card_balance.csv'))
+
+# %%
+
+# Plot scores with tresholds
+
+y_true = application_df['TARGET'].values
+
+acc = []
+rec = []
+pre = []
+f1 = []
+
+tresholds = np.linspace(0, 1, 100)
+
+for tresh in tresholds:
+    y_pred = (scores < tresh).astype('int')
+
+    acc.append(accuracy_score(y_true, y_pred))
+    rec.append(recall_score(y_true, y_pred))
+    pre.append(precision_score(y_true, y_pred))
+    f1.append(f1_score(y_true, y_pred))
+
+
+plt.figure()
+
+plt.plot(tresholds, acc, label='accuracy')
+plt.plot(tresholds, rec, label='recall')
+plt.plot(tresholds, pre, label='precision')
+plt.plot(tresholds, f1, label='f1')
+
+plt.legend()
+plt.xlabel('Treshold')
+plt.ylabel('Score')
+plt.grid(True)
+
+plt.savefig('treshold_score.jpeg')

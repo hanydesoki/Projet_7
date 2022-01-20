@@ -247,6 +247,7 @@ acc = []
 rec = []
 pre = []
 f1 = []
+f9 = []
 
 tresholds = np.linspace(0, 1, 100)
 
@@ -257,6 +258,7 @@ for tresh in tresholds:
     rec.append(recall_score(y_true, y_pred))
     pre.append(precision_score(y_true, y_pred))
     f1.append(f1_score(y_true, y_pred))
+    f9.append(fbeta_score(y_true, y_pred, beta=9))
 
 
 plt.figure()
@@ -265,6 +267,7 @@ plt.plot(tresholds, acc, label='accuracy')
 plt.plot(tresholds, rec, label='recall')
 plt.plot(tresholds, pre, label='precision')
 plt.plot(tresholds, f1, label='f1')
+plt.plot(tresholds, f9, label='f9')
 
 plt.legend()
 plt.xlabel('Treshold')

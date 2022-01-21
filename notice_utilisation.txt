@@ -1,0 +1,23 @@
+Lien github: https://github.com/sourisaboule/Projet_7
+
+Dashboard: https://dashboard-desokihany-p7.herokuapp.com/
+
+Quelques exemples d'id client:
+-149741
+-363290
+-436006
+-377703
+
+Api:
+
+Pour faire une requête, il faut d'abords enregistrer nos données relatifs à un client sous format json.
+Ces json sont en fait des dictionnaires contenant toutes les tables necessaires au modèle. 
+Chacune de ces tables sont également des dictionnaires (en utilisant la méthode to_dict des dataframes de pandas)
+Le code genrate_exemples.py montre comment génerer ces json.
+
+Des exemples se trouvent déja dans le dossier Examples.
+
+Enfin une fois notre json obtenu, il faut entrer cette commande dans une invite de commande avec data.json
+notre fichier json contenant toutes les informations de notre client.
+
+curl -X GET https://api-desokihany-p7.herokuapp.com/predict -H 'Content-Type:application/json' --data @data.json
